@@ -7,7 +7,7 @@ class ObjectDetector:
         self.model = YOLO(path)
 
     def detect(self, frame: np.ndarray) -> list[Detection]:
-        results = self.model.predict(frame)
+        results = self.model.predict(frame, verbose=False)
         detections = []
         for result in results:
             for box in result.boxes:
