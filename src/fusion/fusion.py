@@ -5,7 +5,7 @@ from ..detectors.types import Detection
 def fuse(detections: list[Detection], depth_map: np.ndarray) ->  list[Detection3D]:
     detections_fuse = []
     for detection in detections:
-        x1,y1,x2,y2 = detection.bbox
+        x1, y1, x2, y2 = [int(v) for v in detection.bbox]
         depth = np.median(depth_map[y1:y2,x1:x2])
 
         detection3d = Detection3D(

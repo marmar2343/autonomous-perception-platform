@@ -179,3 +179,8 @@ pyrightconfig.json
 ### ML Models ###
 *.pt
 *.onnx
+
+# video files
+*.mp4
+*.avi
+*.mov
