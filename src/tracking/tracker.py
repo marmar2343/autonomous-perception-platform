@@ -1,11 +1,11 @@
 import supervision as sv
 from src.fusion.types import Detection3D
-from ultralytics import Results
+from ultralytics.engine.results import Results
 
 
 class Tracker:
     def __init__(self):
-        self.tracker = sv.ByteTrack()
+        self.tracker = sv.ByteTrack(lost_track_buffer=60)
     
     def track(self, result: Results, class_names: dict) -> list[Detection3D]:
         detections = sv.Detections.from_ultralytics(result)

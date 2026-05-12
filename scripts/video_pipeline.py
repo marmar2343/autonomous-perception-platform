@@ -6,11 +6,13 @@ sys.path.append(".")
 from src.detectors.detector import ObjectDetector
 from src.depth.depth_estimator import DepthEstimator
 from src.fusion.fusion import fuse
+from src.tracking.tracker import Tracker
 
 cap = cv2.VideoCapture("scripts/test_video.mp4")
 
 test_detector = ObjectDetector( "yolov8n.pt")
 test_estimator = DepthEstimator("depth-anything/Depth-Anything-V2-Small-hf")
+test_tracker = Tracker()
 frame_count = 0
 
 while True:
@@ -25,16 +27,18 @@ while True:
         break
 
 
-    results = test_detector.detect(frame)
+    detections, result = test_detector.detect(frame)
     if(frame_count%3==0):
         depth_map = test_estimator.estimate(frame)
 
+    tracks = test_tracker.track(result, test_detector.model.names)
 
-    detection3D = fuse(results, depth_map)
+
+    detection3D = fuse(tracks, depth_map)
 
     for result in detection3D:
         cv2.rectangle(frame,(int(result.bbox[0]), int(result.bbox[1])), (int(result.bbox[2]),int(result.bbox[3])), (0,255,0),3)
-        frame = cv2.putText(img = frame, text = str(result.depth), org=(int(result.bbox[0]), int(result.bbox[1])), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=5, color=(0,255,0), thickness=3)
+        frame = cv2.putText(img = frame, text = str(result.track_id) + " " + str(result.depth), org=(int(result.bbox[0]), int(result.bbox[1])), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=5, color=(0,255,0), thickness=3)
 
     fps = 1/ (time.time()-start)
     print(f"FPS: {fps:.1f}")

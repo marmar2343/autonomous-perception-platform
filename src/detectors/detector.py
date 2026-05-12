@@ -13,5 +13,5 @@ class ObjectDetector:
             for box in result.boxes:
                 detection = Detection(box.xyxy.tolist()[0],self.model.names[box.cls.item()],box.conf.item())
                 detections.append(detection)
-        return detections
+        return detections, results[0]
 
