@@ -5,3 +5,4 @@ from dataclasses import dataclass
 class Detection3D(Detection):
     #Detection: bbox,class_name,confidence
     depth:float
+    track_id:int = -1
