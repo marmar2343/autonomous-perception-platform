@@ -11,6 +11,7 @@ from src.depth.depth_estimator import DepthEstimator
 from src.fusion.fusion import fuse
 from src.tracking.tracker import Tracker
 from src.tracking.zone_detector import ZoneDetector
+from src.tracking.position_tracker import PositionTracker
 
 cap = cv2.VideoCapture("scripts/test_video.mp4")
 
@@ -21,6 +22,7 @@ test_detector = ObjectDetector( "yolov8n.pt")
 test_estimator = DepthEstimator("depth-anything/Depth-Anything-V2-Small-hf")
 test_tracker = Tracker()
 test_zone_detector = ZoneDetector(np.array(config["zones"][0]["coordinates"]), config["zones"][0]["threshold"])
+test_position_tracker = PositionTracker()
 frame_count = 0
 
 
@@ -46,6 +48,7 @@ while True:
 
     detection3D = fuse(tracks, depth_map)
 
+    test_position_tracker.update(detection3D)
     dangerous_zone_detection = test_zone_detector.detect_in_zone(detection3D)
 
     for result in detection3D:
@@ -62,7 +65,9 @@ while True:
     print(f"FPS: {fps:.1f}")
 
     zone_points = np.array(config["zones"][0]["coordinates"])
-    cv2.polylines(frame, [zone_points], isClosed=True, color=(0, 255, 255), thickness=5)
+    cv2.polylines(frame, [zone_points], isClosed=True, color=(0, 0, 255), thickness=5)
+    
+    frame = test_position_tracker.draw_trajectories(frame)
     
     # Display the frame
     frame = cv2.resize(frame, (480, 640))

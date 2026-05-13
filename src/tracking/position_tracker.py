@@ -8,12 +8,17 @@ class PositionTracker:
         self.trajectories = {}
 
     def update(self,new_detections:list[Detection3D]):
+        current_ids = {d.track_id for d in new_detections}
+        ids_to_remove = [id for id in self.trajectories if id not in current_ids]
+        for id in ids_to_remove:
+            del self.trajectories[id]
+        
         for detection in new_detections:
             if detection.track_id in self.trajectories:
                 self.trajectories[detection.track_id].append(detection.bbox)
             
             else:
-                self.trajectories[detection.track_id]=deque(maxlen=30)
+                self.trajectories[detection.track_id]=deque(maxlen=60)
                 self.trajectories[detection.track_id].append(detection.bbox)
         
     def draw_trajectories(self,frame:np.ndarray) -> np.ndarray:
@@ -25,6 +30,6 @@ class PositionTracker:
 
                 cx2 = int((points[i+1][0] + points[i+1][2]) / 2)
                 cy2 = int((points[i+1][1] + points[i+1][3]) / 2)
-                cv2.line(frame,(cx1,cy1),(cx2,cy2),(0,255,255),3)
+                cv2.line(frame,(cx1,cy1),(cx2,cy2),(0,255,255),10)
 
         return frame
