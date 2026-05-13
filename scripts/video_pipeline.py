@@ -13,11 +13,14 @@ from src.tracking.tracker import Tracker
 from src.tracking.zone_detector import ZoneDetector
 from src.tracking.position_tracker import PositionTracker
 
+# open video from file path
 cap = cv2.VideoCapture("scripts/test_video.mp4")
 
+# YAML file for parameters
 with open("configs/zones.yaml") as f:
     config = yaml.safe_load(f)
 
+# initialization
 test_detector = ObjectDetector( "yolov8n.pt")
 test_estimator = DepthEstimator("depth-anything/Depth-Anything-V2-Small-hf")
 test_tracker = Tracker()
@@ -28,29 +31,32 @@ frame_count = 0
 
 
 while True:
-    start = time.time()
+    start = time.time() # for FPS
 
+    # read one frame at the time
     ret, frame=cap.read()
     #frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-
 
     if not ret:
         print("End of video or error occured reading frame")
         break
 
-
+    # use YOLOv8 for object detecition
     detections, result = test_detector.detect(frame)
-    if(frame_count%3==0):
+    if(frame_count%3==0): #every 3rd frame for optimization
+        #depth estimation using DepthAnythingV2
         depth_map = test_estimator.estimate(frame)
 
+    # track all objects in current frame
     tracks = test_tracker.track(result, test_detector.model.names)
-
-
+    # make detection3D objects with depth
     detection3D = fuse(tracks, depth_map)
-
+    #update position tracker for drawing lines
     test_position_tracker.update(detection3D)
+    # detect objects in dangerous zone
     dangerous_zone_detection = test_zone_detector.detect_in_zone(detection3D)
 
+    # draw rectangles around all detected objects, if they are in dangerous zone color red, else color green
     for result in detection3D:
         if result.track_id in dangerous_zone_detection:
             cv2.rectangle(frame,(int(result.bbox[0]), int(result.bbox[1])), (int(result.bbox[2]),int(result.bbox[3])), (0,0,255),3)
@@ -64,18 +70,19 @@ while True:
     fps = 1/ (time.time()-start)
     print(f"FPS: {fps:.1f}")
 
+    # draw frame around dangerous zone for visualization
     zone_points = np.array(config["zones"][0]["coordinates"])
     cv2.polylines(frame, [zone_points], isClosed=True, color=(0, 0, 255), thickness=5)
-    
+    # draw path lines
     frame = test_position_tracker.draw_trajectories(frame)
     
-    # Display the frame
+    # display the frame
     frame = cv2.resize(frame, (480, 640))
     cv2.imshow("Video", frame)
 
     frame_count+=1
 
-    # Press 'q' to exit the loop
+    # press 'q' to exit the loop
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
