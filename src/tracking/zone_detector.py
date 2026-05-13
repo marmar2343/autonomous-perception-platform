@@ -4,11 +4,13 @@ import supervision as sv
 
 class ZoneDetector:
     def __init__(self, polygon: np.ndarray, treshold: int = 30):
-        self.polygon_zone = sv.PolygonZone(polygon=polygon)
-        self.treshold = treshold
-        self.track_id = {}
+        self.polygon_zone = sv.PolygonZone(polygon=polygon) # define zone of interest with sv.PolygonZone
+        self.treshold = treshold # no. of frames to determine that object is in dangerous zone
+        self.track_id = {} # tracking ids of detected objects
 
+    # find objects that are inn polygon_zone for too long
     def detect_in_zone(self, detections3D: list[Detection3D]) -> list[int]:
+        # convert to sv.Detections format required by PolygonZone.trigger()
         xyxy = np.array([d.bbox for d in detections3D])
         tracker_ids = np.array([d.track_id for d in detections3D])
         sv_detections = sv.Detections(xyxy=xyxy, tracker_id=tracker_ids)
