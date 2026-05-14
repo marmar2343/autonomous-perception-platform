@@ -9,6 +9,9 @@ End-to-end autonomous perception system with real-time object detection, depth e
 * Real-time object detection using YOLOv8
 * Monocular depth estimation using DepthAnything v2
 * 3D position fusion — combining detections with  depth data
+* Multi-object tracking with persistent IDs (ByteTrack)
+* Zone detection with configurable alerts
+* Trajectory visualization
 
 ## Tech Stack
 
@@ -16,6 +19,8 @@ End-to-end autonomous perception system with real-time object detection, depth e
 * YOLOv8
 * DepthAnything v2
 * OpenCV
+* ByteTrack
+* supervision
 
 ### Data Engineering
 * Coming soon...
@@ -50,7 +55,7 @@ python scripts/video_pipeline.py
 ## Roadmap
 
 - [x] 3D scene perception
-- [ ] Multi-object tracking
+- [x] Multi-object tracking
 - [ ] Streaming data pipeline
 - [ ] MLOps and containerization
 - [ ] Multimodal VLM module

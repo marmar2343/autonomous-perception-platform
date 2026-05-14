@@ -184,3 +184,6 @@ pyrightconfig.json
 *.mp4
 *.avi
 *.mov
+
+
+data/
